@@ -1,0 +1,37 @@
+docker run --network=host -p 8080:8080 -e KAFKA_BROKERS=localhost:9092 docker.redpanda.com/redpandadata/console:latest  GNU nano 6.2                                                  docker-compose.yml                                                            
+services:
+  redpanda:
+    image: redpandadata/redpanda  # Latest stable version
+    container_name: redpanda
+    hostname: redpanda
+    ports:
+      - "9092:9092"  # Kafka API port
+      - "9644:9644"  # Redpanda metrics and management port
+    environment:
+      - REDPANDA_MODE=dev  # Running in dev mode (for testing purposes)
+      - REDPANDA_LISTENERS=INSIDE://redpanda:9092
+      - REDPANDA_ADVERTISED_LISTENERS=OUTSIDE://localhost:9092
+      - REDPANDA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT
+      - REDPANDA_RPC_SERVER_ADDRESS=0.0.0.0
+      - REDPANDA_KAFKA_API_ENABLE=true
+      - REDPANDA_ID=1
+    networks:
+      - redpanda_network
+
+  redpanda-console:
+    image: redpandadata/console  # Redpanda Console version
+    container_name: redpanda-console
+    environment:
+      - KAFKA_BROKER=redpanda:9092  # Kafka broker address
+    ports:
+      - "8080:8080"  # Redpanda Console UI
+    depends_on:
+      - redpanda
+    networks:
+      - redpanda_network
+
+networks:
+  redpanda_network:
+    driver: bridge
+
+
